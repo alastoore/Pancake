@@ -1,0 +1,111 @@
+## Overview
+
+Two authentication patterns using Supabase and Next.js 16:
+
+1. **Email + Password** - Classic credentials flow with Supabase-managed sessions and a React listener that never goes stale
+2. **Google Login** - Social login via OAuth with automatic UI sync powered by `onAuthStateChange`
+
+## Features
+
+- ✅ Server-side authentication with Supabase SSR
+- ✅ Client-side session management with React listeners
+- ✅ Protected routes via Next.js proxy (middleware)
+- ✅ Automatic token refresh handling
+- ✅ Type-safe Supabase client setup
+
+## Prerequisites
+
+- Node.js 18+ 
+- A Supabase project ([create one here](https://supabase.com))
+
+## Getting Started
+
+### 1. Clone and Install
+
+```bash
+npm install
+```
+
+### 2. Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+You can find these values in your Supabase project settings
+
+### 3. Configure Supabase
+
+#### For Email + Password:
+- Enable Email provider in Authentication > Providers
+
+#### For Google Login:
+- Enable Google provider in Authentication > Providers
+- Add your redirect URL
+- Add production redirect URL when deploying
+
+### 4. Run the Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the demo.
+
+## Project Structure
+
+```
+├── app/
+│   ├── email-password/     # Email + Password demo
+│   ├── google-login/        # Google OAuth demo
+│   └── page.tsx             # Home page with demo links
+├── lib/
+│   └── supabase/
+│       ├── browser-client.ts    # Client-side Supabase client
+│       └── server-client.ts     # Server-side Supabase client
+└── proxy.ts                 # Next.js proxy for protected routes
+```
+
+## Key Concepts
+
+### Server Client (`lib/supabase/server-client.ts`)
+- Used in Server Components and API routes
+- Shares cookies via Next.js `cookies()` API
+- Automatically refreshes tokens when needed
+
+### Browser Client (`lib/supabase/browser-client.ts`)
+- Used in Client Components
+- Singleton pattern for efficiency
+- Works with React's `onAuthStateChange` listener
+
+### Proxy (`proxy.ts`)
+- Runs on every request
+- Protects routes starting with `/protected`
+- Redirects unauthenticated users to `/login`
+
+## Demo Pages
+
+- `/email-password` - Email + Password authentication demo
+- `/google-login` - Google OAuth authentication demo
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org) - React framework with App Router
+- [Supabase](https://supabase.com) - Authentication and backend
+- [TypeScript](https://www.typescriptlang.org) - Type safety
+- [Tailwind CSS](https://tailwindcss.com) - Styling
+
+## Learn More
+
+- [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
+- [Next.js Documentation](https://nextjs.org/docs)
