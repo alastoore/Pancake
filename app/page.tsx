@@ -1,91 +1,40 @@
 import Link from "next/link";
 
-const demos = [
-  {
-    href: "/email-password",
-    title: "Register / Log in",
-    highlights: ["Create an account with any valid email", "Login with your own email address"],
-    theme: {
-      card:
-        "border border-emerald-400/30 bg-gradient-to-br from-[#0a2416] via-[#04130d] to-[#0f3022] shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-emerald-300/60",
-      open: "text-emerald-300",
-      title: "text-emerald-100",
-      bullets: "text-emerald-200/90",
-      overlays: [
-        "pointer-events-none absolute -left-8 -top-6 -z-10 h-20 w-32 rounded-full bg-[radial-gradient(circle,_rgba(16,185,129,0.18),_transparent)] blur-lg",
-        "pointer-events-none absolute bottom-4 right-4 -z-10 h-16 w-32 rounded-full bg-[linear-gradient(150deg,_rgba(45,212,191,0.25),_rgba(59,130,246,0.12))] blur-lg",
-      ],
-    },
-  },
-  {
-    href: "/google-login",
-    title: "Login with Google",
-    highlights: ["Create an account using your Google email", "Login using your Google email"],
-    theme: {
-      card:
-        "border border-[#5a8dee]/30 bg-gradient-to-br from-[#060f24] via-[#07122e] to-[#0f2346] shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-[#7fb0ff]/60",
-      open: "text-[#8ab4ff]",
-      title: "text-[#bcd7ff]",
-      bullets: "text-[#9fc1ff]",
-      overlays: [
-        "pointer-events-none absolute -right-8 -top-6 -z-10 h-16 w-16 rounded-full bg-[radial-gradient(circle,_rgba(66,133,244,0.3),_rgba(234,67,53,0.06))] blur-lg",
-        "pointer-events-none absolute bottom-4 left-6 -z-10 h-12 w-32 rounded-full bg-[linear-gradient(120deg,_rgba(251,188,5,0.18),_rgba(66,133,244,0.12))] blur-lg",
-      ],
-    },
-  },
-] as const;
-
-export default function Home() {
+export default function Home(): JSX.Element {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-16">
-        <header className="space-y-4">
-          <p className="text-sm uppercase tracking-[0.25em] text-emerald-300/90">
-            Supabase × Next.js
-          </p>
-          <h1 className="text-4xl font-semibold text-white drop-shadow-sm">
-            Two auth flows.
-          </h1>
-        </header>
-        <section className="grid gap-6 md:grid-cols-3">
-          {demos.map((demo) => {
-            const theme = demo.theme;
-            return (
-              <Link
-                key={demo.href}
-                href={demo.href}
-                className={`group relative isolate flex flex-col overflow-hidden rounded-[32px] p-6 transition hover:-translate-y-1 ${
-                  theme?.card ??
-                  "border border-white/5 bg-slate-900/60 shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-emerald-300/50"
-                }`}
-              >
-                {theme?.overlays?.map((overlayClass, index) => (
-                  <span key={index} className={overlayClass} aria-hidden="true" />
-                ))}
-                <div className="flex items-center justify-between">
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Flow</p>
-                  <span className={`text-sm font-semibold ${theme?.open ?? "text-emerald-300"}`}>
-                    Open ↗
-                  </span>
-                </div>
-                <h3
-                  className={`mt-4 text-xl font-semibold ${
-                    theme?.title ?? "text-white"
-                  } transition group-hover:opacity-95`}
-                >
-                  {demo.title}
-                </h3>
-                <p className="mt-2 text-sm text-slate-300">{demo.description}</p>
-                <ul className={`mt-4 space-y-1 text-xs ${theme?.bullets ?? "text-slate-400"}`}>
-                  {demo.highlights.map((highlight) => (
-                    <li key={highlight}>• {highlight}</li>
-                  ))}
-                </ul>
-              </Link>
-            );
-          })}
-        </section>
-      </div>
-    </div>
+    <main className="min-h-screen flex items-center justify-center bg-[url('/welcome-bg.png')] bg-cover bg-center bg-no-repeat">
+      
+      <section className="text-center space-y-6">
+        
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide font-monteserrat italic">
+          READY TO PLAY?
+        </h1>
+
+        <p className="text-white/80 text-sm md:text-base tracking-[0.2em] font-inter">
+          COMPETE ACROSS MULTIPLE SPORT
+        </p>
+
+        <div className="mt-8 flex flex-col items-center gap-4">
+          
+          <Link
+            href="/email-password"
+            className="w-72 flex items-center justify-left gap-3 bg-white text-red-600 px-6 py-4 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 active:scale-95 transition"
+          >
+            <img src="/sign-up-icon.png" alt="Sign Up Icon" className="w-6 h-6 scale-200" />
+            Register / Sign-up
+          </Link>
+
+          <Link
+            href="/login-page"
+            className="w-72 flex items-center justify-left gap-3 bg-gray-200 text-gray-700 px-6 py-4 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 active:scale-95 transition"
+          >
+            <img src="/login-icon.png" alt="Log In Icon" className="w-6 h-6 scale-200" />
+            Log in
+          </Link>
+
+        </div>
+
+      </section>
+    </main>
   );
 }
