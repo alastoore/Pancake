@@ -94,7 +94,7 @@ export default function EmailPasswordDemo({
           onClick={handleSignOut}
           className="mt-6 h-12 w-full rounded-xl bg-[#d62828] text-lg font-bold text-white hover:bg-[#bb1f1f]"
         >
-          SIGN OUT
+          SIGN OU
         </button>
       </div>
     );
