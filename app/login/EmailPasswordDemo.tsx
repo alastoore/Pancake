@@ -1,8 +1,9 @@
 "use client";
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { getSupabaseBrowserClient, Database } from "@/lib/supabase/browser-client";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // 1. Import the router
 
 type EmailPasswordDemoProps = {
   user?: User | null;
@@ -12,6 +13,7 @@ export default function EmailPasswordDemo({
   user = null,
 }: EmailPasswordDemoProps) {
   const supabase = getSupabaseBrowserClient();
+  const router = useRouter(); // 2. Initialize the router
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,23 +35,46 @@ export default function EmailPasswordDemo({
   }, [supabase]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setStatus("");
+  event.preventDefault();
+  setLoading(true);
+  setStatus("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  // 1. We must destructure 'data' here so it can be used below
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) {
-      setStatus(error.message);
-    } else {
-      setStatus("Signed in successfully.");
-    }
-
+  if (error || !data.user) {
+    setStatus(error?.message || "Login failed");
     setLoading(false);
+    return;
   }
+
+  // 2. Fetch the role. 
+  // We use 'as any' as a quick fix to bypass the 'never' type error 
+  // if your Database types aren't perfectly synced yet.
+  const { data: profile, error: profileError } = await (supabase as any)
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .single();
+
+  if (profileError || !profile) {
+    setStatus("Error fetching profile. Ensure your account is fully set up.");
+    setLoading(false);
+    return;
+  }
+
+  // 3. Redirect based on the role
+  if (profile.role === "organizer") {
+    router.push("/organizer/profile");
+  } else {
+    router.push("/player/profile");
+  }
+
+  setLoading(false);
+}
 
   async function handleGoogleLogin() {
     setGoogleLoading(true);
@@ -78,26 +103,6 @@ export default function EmailPasswordDemo({
 
     setCurrentUser(null);
     setStatus("Signed out successfully.");
-  }
-
-  // ✅ IF LOGGED IN
-  if (currentUser) {
-    return (
-      <div className="rounded-[20px] bg-white px-8 py-9 shadow-[0_18px_40px_rgba(0,0,0,0.25)]">
-        <h2 className="mb-4 text-center text-[2rem] font-extrabold text-black">
-          WELCOME
-        </h2>
-
-        <p className="text-sm text-gray-700">{currentUser.email}</p>
-
-        <button
-          onClick={handleSignOut}
-          className="mt-6 h-12 w-full rounded-xl bg-[#d62828] text-lg font-bold text-white hover:bg-[#bb1f1f]"
-        >
-          SIGN OUT
-        </button>
-      </div>
-    );
   }
 
   // ✅ LOGIN UI
