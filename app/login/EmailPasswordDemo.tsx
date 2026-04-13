@@ -94,7 +94,7 @@ export default function EmailPasswordDemo({
           onClick={handleSignOut}
           className="mt-6 h-12 w-full rounded-xl bg-[#d62828] text-lg font-bold text-white hover:bg-[#bb1f1f]"
         >
-          SIGN OU
+          SIGN OUT
         </button>
       </div>
     );
@@ -118,7 +118,7 @@ export default function EmailPasswordDemo({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500"
+            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500 text-gray-900 placeholder: text-gray-400"
           />
         </div>
 
@@ -132,7 +132,7 @@ export default function EmailPasswordDemo({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500"
+            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500 text-gray-900 placeholder: text-gray-400"
           />
         </div>
 
