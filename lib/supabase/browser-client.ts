@@ -3,11 +3,37 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type SupabaseSchema = Record<string, never>;
+// Define the shape of your database
+export type Database = {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {                  // What a row looks like when you READ it
+          id: string;
+          email: string;
+          role: 'player' | 'organizer'; // Restricts the role to these two strings
+          created_at: string;
+        };
+        Insert: {               // What you provide when you CREATE a row
+          id: string;
+          email: string;
+          role: 'player' | 'organizer';
+          created_at?: string;  // Optional because DB handles it
+        };
+        Update: {               // What you provide when you EDIT a row
+          id?: string;
+          email?: string;
+          role?: 'player' | 'organizer';
+          created_at?: string;
+        };
+      };
+    };
+  };
+};
 
-let client: SupabaseClient<SupabaseSchema> | null = null;
+let client: SupabaseClient<Database> | null = null;
 
-export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
+export function getSupabaseBrowserClient(): SupabaseClient<Database> {
   if (client) {
     return client;
   }
@@ -21,6 +47,6 @@ export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
     );
   }
 
-  client = createBrowserClient<SupabaseSchema>(supabaseUrl, supabaseAnonKey);
+  client = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
   return client;
 }
