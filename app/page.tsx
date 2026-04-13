@@ -17,7 +17,7 @@ export default function Home(): JSX.Element {
         <div className="mt-8 flex flex-col items-center gap-4">
           
           <Link
-            href="/email-password"
+            href="/register"
             className="w-72 flex items-center justify-left gap-3 bg-white text-red-600 px-6 py-4 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 active:scale-95 transition"
           >
             <img src="/sign-up-icon.png" alt="Sign Up Icon" className="w-6 h-6 scale-200" />
@@ -25,7 +25,7 @@ export default function Home(): JSX.Element {
           </Link>
 
           <Link
-            href="/login-page"
+            href="/login"
             className="w-72 flex items-center justify-left gap-3 bg-gray-200 text-gray-700 px-6 py-4 rounded-xl text-lg font-semibold shadow-lg hover:scale-105 active:scale-95 transition"
           >
             <img src="/login-icon.png" alt="Log In Icon" className="w-6 h-6 scale-200" />
