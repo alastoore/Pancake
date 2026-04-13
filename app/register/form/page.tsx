@@ -38,7 +38,11 @@ export default function RegisterPage() {
       alert(error.message);
     } else {
       alert("Success! Please check your email to confirm your account.");
-      router.push("/login");
+      if (role === "organizer"){
+        router.push("/organizer/profile");
+      } else {
+        router.push("/player/profile");
+      }
     }
     setLoading(false);
   };
