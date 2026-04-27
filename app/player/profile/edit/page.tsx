@@ -1,80 +1,125 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 export default function EditProfilePage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const supabase = getSupabaseBrowserClient();
 
-  // 🔥 Get existing data
-  const [fullName, setFullName] = useState(searchParams.get("name") || "");
-  const [dojo, setDojo] = useState(searchParams.get("dojo") || "");
-  const [belt, setBelt] = useState(searchParams.get("belt") || "");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [dob, setDob] = useState(searchParams.get("dob") || "");
-  const [instructor, setInstructor] = useState(searchParams.get("instructor") || "");
-  const [certificate] = useState(searchParams.get("certificate") || "Not uploaded");
-  const [status] = useState(searchParams.get("status") || "pending");
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Improved input style (better visibility)
+  const [fullName, setFullName] = useState("");
+  const [dojo, setDojo] = useState("");
+  const [belt, setBelt] = useState("");
+  const [category, setCategory] = useState("");
+  const [dob, setDob] = useState("");
+  const [instructor, setInstructor] = useState("");
+  const [status, setStatus] = useState("pending");
+
   const inputStyle =
-    "w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500";
+    "w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500";
 
   const labelStyle = "block text-sm font-semibold text-gray-700 mb-1 ml-1";
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  // 🔥 FETCH EXISTING PROFILE
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user;
 
-    router.push(
-      `/player/profile?name=${encodeURIComponent(
-        fullName
-      )}&dojo=${encodeURIComponent(dojo)}&belt=${encodeURIComponent(
-        belt
-      )}&category=${encodeURIComponent(category)}&dob=${encodeURIComponent(
-        dob
-      )}&instructor=${encodeURIComponent(
-        instructor
-      )}&certificate=${encodeURIComponent(
-        certificate
-      )}&status=${encodeURIComponent(status)}`
-    );
+      if (!user) return;
+
+      const { data, error } = await (supabase as any)
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error(error.message);
+        return;
+      }
+
+      setFullName(data.full_name || "");
+      setDojo(data.dojo || "");
+      setBelt(data.belt_rank || "");
+      setCategory(data.category || "");
+      setDob(data.dob || "");
+      setInstructor(data.instructor || "");
+      setStatus(data.status || "pending");
+    };
+
+    fetchProfile();
+  }, []);
+
+  // 🔥 SAVE TO DATABASE
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+
+    if (!user) {
+      alert("User not found");
+      return;
+    }
+
+    const { error } = await (supabase as any)
+      .from("profiles")
+      .update({
+        full_name: fullName,
+        dojo,
+        belt_rank: belt,
+        category,
+        dob,
+        instructor,
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error(error.message);
+      alert("Failed to update profile");
+      setLoading(false);
+      return;
+    }
+
+    alert("Profile updated successfully!");
+
+    // 🔥 Redirect back to profile (will refetch updated data)
+    router.push("/player/profile");
   };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-lg border border-gray-200">
-        
-        {/* HEADER */}
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+      <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-lg border">
+
+        <h1 className="text-2xl font-bold text-center mb-6">
           Edit Profile
         </h1>
 
         <form onSubmit={handleSave} className="flex flex-col gap-4">
 
-          {/* FULL NAME */}
           <div>
             <label className={labelStyle}>Full Name</label>
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
               className={inputStyle}
             />
           </div>
 
-          {/* DOJO */}
           <div>
             <label className={labelStyle}>Dojo / Club</label>
             <input
               value={dojo}
               onChange={(e) => setDojo(e.target.value)}
-              placeholder="Enter your dojo"
               className={inputStyle}
             />
           </div>
 
-          {/* BELT */}
           <div>
             <label className={labelStyle}>Belt Rank</label>
             <select
@@ -87,12 +132,12 @@ export default function EditProfilePage() {
               <option>Yellow</option>
               <option>Green</option>
               <option>Blue</option>
+              <option>Purple</option>
               <option>Brown</option>
               <option>Black</option>
             </select>
           </div>
 
-          {/* CATEGORY */}
           <div>
             <label className={labelStyle}>Category</label>
             <select
@@ -122,7 +167,6 @@ export default function EditProfilePage() {
             <input
               value={instructor}
               onChange={(e) => setInstructor(e.target.value)}
-              placeholder="Enter your instructor"
               className={inputStyle}
             />
           </div>
@@ -136,12 +180,12 @@ export default function EditProfilePage() {
             />
           </div>
 
-          {/* BUTTON */}
           <button
             type="submit"
-            className="mt-4 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition shadow-md active:scale-95"
+            disabled={loading}
+            className="mt-4 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition"
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </button>
 
         </form>

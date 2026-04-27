@@ -17,7 +17,6 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [dojo, setDojo] = useState("");
   const [beltRank, setBeltRank] = useState("");
-  const [category, setCategory] = useState("");
   const [dob, setDob] = useState("");
   const [instructor, setInstructor] = useState("");
   const [certificate, setCertificate] = useState<File | null>(null);
@@ -43,8 +42,7 @@ export default function RegisterPage() {
         !fullName ||
         !dob ||
         !instructor ||
-        !beltRank ||
-        !category
+        !beltRank 
       ) {
         alert("Please fill in all required fields.");
         setLoading(false);
@@ -126,7 +124,6 @@ export default function RegisterPage() {
           full_name: fullName,
           dojo,
           belt_rank: beltRank,
-          category,
           dob,
           instructor,
           certificate_url: certificatePath, // 🔥 NEW

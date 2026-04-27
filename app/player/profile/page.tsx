@@ -23,7 +23,6 @@ type Profile = {
   full_name: string;
   dojo: string;
   belt_rank: string;
-  category: string;
   dob: string;
   instructor: string;
   status: string;
@@ -34,17 +33,14 @@ export default function PlayerProfilePage() {
   const supabase = getSupabaseBrowserClient();
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [certificateUrl, setCertificateUrl] = useState<string | null>(null); // ✅ FIXED
+  const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData?.user;
 
-      if (!user) {
-        console.log("No user logged in");
-        return;
-      }
+      if (!user) return;
 
       const { data, error } = await (supabase as any)
         .from("profiles")
@@ -59,7 +55,7 @@ export default function PlayerProfilePage() {
 
       setProfile(data);
 
-      // 🔥 FIX: Generate signed URL INSIDE here
+      // 🔥 Generate signed URL for certificate
       if (data?.certificate_url) {
         const { data: signedData, error: signedError } =
           await supabase.storage
@@ -77,7 +73,6 @@ export default function PlayerProfilePage() {
     fetchProfile();
   }, []);
 
-  // 🔄 Loading fallback
   if (!profile) {
     return <p className="p-6">Loading profile...</p>;
   }
@@ -85,7 +80,6 @@ export default function PlayerProfilePage() {
   const playerName = profile.full_name || "New Player";
   const dojo = profile.dojo || "Independent";
   const belt = profile.belt_rank || "Not Set";
-  const category = profile.category || "Not Set";
   const dob = profile.dob || "Not Set";
   const instructor = profile.instructor || "Not Set";
   const status = profile.status || "pending";
@@ -100,7 +94,7 @@ export default function PlayerProfilePage() {
   return (
     <main className="min-h-screen bg-white text-gray-900 font-sans">
 
-      {/* 🔴 HEADER */}
+      {/* HEADER */}
       <header className="border-b border-gray-100 p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-950">
@@ -118,10 +112,10 @@ export default function PlayerProfilePage() {
         </div>
       </header>
 
-      {/* 🔵 MAIN CONTENT */}
+      {/* MAIN */}
       <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-10">
 
-        {/* 🥋 KARATE PROFILE */}
+        {/* PROFILE */}
         <section className="bg-gray-50 p-6 rounded-2xl border border-gray-100 shadow-sm">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
             Karate Profile 🥋
@@ -136,11 +130,6 @@ export default function PlayerProfilePage() {
             <div>
               <p className="text-gray-500">Belt Rank</p>
               <p className="font-semibold">{belt}</p>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Category</p>
-              <p className="font-semibold">{category}</p>
             </div>
 
             <div>
@@ -161,7 +150,7 @@ export default function PlayerProfilePage() {
             </div>
           </div>
 
-          {/* 🔥 CERTIFICATE (NEW) */}
+          {/* CERTIFICATE */}
           {certificateUrl && (
             <div className="mt-4">
               <p className="text-gray-500 text-sm mb-1">Certificate</p>
@@ -175,9 +164,19 @@ export default function PlayerProfilePage() {
               </a>
             </div>
           )}
+
+          {/* 🔥 EDIT BUTTON */}
+          <div className="mt-6">
+            <Link
+              href="/player/profile/edit"
+              className="inline-block bg-red-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-red-700 transition"
+            >
+              Edit Profile
+            </Link>
+          </div>
         </section>
 
-        {/* 🟢 PLAYER STATS */}
+        {/* STATS */}
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-6">
             Key Performance
@@ -200,7 +199,7 @@ export default function PlayerProfilePage() {
           </div>
         </section>
 
-        {/* 🔵 UPCOMING EVENTS */}
+        {/* EVENTS */}
         <section>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">
@@ -239,4 +238,3 @@ export default function PlayerProfilePage() {
     </main>
   );
 }
-
