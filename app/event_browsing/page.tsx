@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client';
 
-// Define the interface to solve the TypeScript 'never' errors
+// Interface for the Supabase Profile table
+interface UserProfile {
+  full_name: string;
+}
+
+// Interface for the Event data structure
 interface TournamentEvent {
   id: number;
   title: string;
@@ -15,10 +21,13 @@ interface TournamentEvent {
 }
 
 export default function EventBrowsing() {
-  // Explicitly typing the state to allow either the Event object or null
+  // State for the authenticated user's name
+  const [userName, setUserName] = useState<string>("Loading...");
+  
+  // State for the event preview modal
   const [previewEvent, setPreviewEvent] = useState<TournamentEvent | null>(null);
 
-  // Mock data for the 3 event listings
+  // Mock data for the event listings
   const [events] = useState<TournamentEvent[]>([
     { 
       id: 1, 
@@ -49,23 +58,55 @@ export default function EventBrowsing() {
     }
   ]);
 
+  useEffect(() => {
+    // Initialize the browser-specific Supabase client
+    const supabase = getSupabaseBrowserClient();
+
+    const fetchUserProfile = async () => {
+      // 1. Identify the current session user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        setUserName("Guest");
+        return;
+      }
+
+      // 2. Fetch only the full_name from the profiles table
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error("Profile fetch error:", error);
+        setUserName("User");
+      } else if (data) {
+        // 3. Use the Interface to safely cast the data and update state
+        const profile = data as unknown as UserProfile;
+        setUserName(profile.full_name);
+      }
+    };
+
+    fetchUserProfile();
+  }, []); // Run once on mount
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Header Section */}
       <header className="bg-[#D32F2F] text-white p-4 flex justify-between items-center shadow-md">
-        <div className="text-xl font-bold tracking-tight">HuddleUp</div>
+        <div className="text-xl font-bold tracking-tight text-white">HuddleUp</div>
         
-        {/* Clickable name redirects to player's profile page */}
         <div className="flex items-center gap-3">
           <Link 
             href="/player/profile" 
             className="font-medium hover:text-gray-200 transition-colors cursor-pointer"
           >
-            Michael Anderson
+            {userName}
           </Link>
           <div className="w-10 h-10 bg-gray-300 rounded-full border-2 border-white overflow-hidden shadow-sm">
             <img 
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Michael" 
+              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} 
               alt="User Avatar" 
               className="w-full h-full object-cover"
             />
@@ -73,11 +114,11 @@ export default function EventBrowsing() {
         </div>
       </header>
 
-      {/* Hero / Search Section */}
+      {/* Hero Section */}
       <div className="bg-gradient-to-r from-[#E53935] to-[#C62828] p-10 text-white">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-extrabold mb-2">Find Tournaments</h1>
-          <p className="text-lg opacity-90 mb-6">Discover and join exciting tournaments near you.</p>
+          <h1 className="text-4xl font-extrabold mb-2 text-white">Find Tournaments</h1>
+          <p className="text-lg opacity-90 mb-6 text-white">Discover and join exciting tournaments near you.</p>
           <div className="relative max-w-lg">
             <input 
               type="text" 
@@ -99,30 +140,23 @@ export default function EventBrowsing() {
               onClick={() => setPreviewEvent(event)}
               className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6 cursor-pointer hover:border-red-200 hover:shadow-lg transition-all group"
             >
-              {/* Event Icon Placeholder */}
               <div className="bg-red-50 p-5 rounded-full group-hover:bg-red-100 transition-colors">
                 <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
 
-              {/* Event Details in a Single Row */}
               <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
                 <div className="flex flex-col">
                   <span className="font-extrabold text-lg text-gray-900">{event.title}</span>
                   <span className="text-red-600 text-sm font-bold uppercase tracking-wider">{event.type}</span>
                 </div>
-                
                 <div className="flex items-center text-gray-500 text-sm">
-                  <span className="mr-2 text-red-400">📅</span>
-                  {event.date}
+                  <span className="mr-2 text-red-400">📅</span> {event.date}
                 </div>
-                
                 <div className="flex items-center text-gray-500 text-sm">
-                  <span className="mr-2 text-red-400">📍</span>
-                  {event.location}
+                  <span className="mr-2 text-red-400">📍</span> {event.location}
                 </div>
-                
                 <div className="flex items-center justify-end text-gray-700 font-semibold">
                   <span className="bg-gray-100 px-3 py-1 rounded-full text-xs">
                     👥 {event.teams}
@@ -136,22 +170,15 @@ export default function EventBrowsing() {
         {/* Event Preview Modal */}
         {previewEvent && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full animate-in fade-in zoom-in duration-200">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-3xl font-black text-gray-900">{previewEvent.title}</h2>
-                  <p className="text-red-600 font-bold">{previewEvent.type}</p>
-                </div>
-              </div>
+            <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+              <h2 className="text-3xl font-black text-gray-900 mb-1">{previewEvent.title}</h2>
+              <p className="text-red-600 font-bold mb-4">{previewEvent.type}</p>
               
-              <div className="space-y-3 mb-6">
-                <p className="text-gray-600 leading-relaxed italic border-l-4 border-red-500 pl-4">
-                  {previewEvent.description}
-                </p>
+              <div className="space-y-3 mb-6 border-l-4 border-red-500 pl-4">
+                <p className="text-gray-600 italic">{previewEvent.description}</p>
                 <div className="text-sm text-gray-500">
                   <p><strong>Date:</strong> {previewEvent.date}</p>
                   <p><strong>Venue:</strong> {previewEvent.location}</p>
-                  <p><strong>Capacity:</strong> {previewEvent.teams}</p>
                 </div>
               </div>
 
@@ -160,7 +187,7 @@ export default function EventBrowsing() {
                   e.stopPropagation();
                   setPreviewEvent(null);
                 }}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition-colors shadow-lg active:scale-[0.98]"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition-all"
               >
                 Close Preview
               </button>
