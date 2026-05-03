@@ -29,7 +29,8 @@ export default function AdminVerifyPage() {
       const { data, error } = await (supabase as any)
         .from("profiles")
         .select("*")
-        .eq("role", "player");
+        .eq("role", "player")
+        .eq("status", "pending");
 
       if (error) {
         console.error(error.message);
@@ -76,13 +77,9 @@ export default function AdminVerifyPage() {
       return;
     }
 
-    // 🔄 Update UI instantly
+    // 🔄 Remove the player from the pending list immediately after approval/rejection
     setPlayers((currentPlayers) =>
-      currentPlayers.map((player) =>
-        player.id === playerId
-          ? { ...player, status: nextStatus }
-          : player
-      )
+      currentPlayers.filter((player) => player.id !== playerId)
     );
   };
 
