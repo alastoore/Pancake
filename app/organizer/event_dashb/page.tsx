@@ -156,7 +156,7 @@ export default function EventBrowsing() {
 
       {/* Event Listings Section */}
       <main className="p-8 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Upcoming Tournaments</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Managed Tournaments</h2>
         
         <div className="flex flex-col gap-4">
           {events.map((event) => (
