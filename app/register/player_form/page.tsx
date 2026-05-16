@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { Montserrat } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image"; // Added Image import for your assets
 
 const montserrat = Montserrat({ 
   subsets: ["latin"],
@@ -26,7 +27,6 @@ function calculateAge(dob: string): number { // calculate player's age
   return age;
 }
 
-
 export default function RegisterPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -34,6 +34,7 @@ export default function RegisterPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // <-- New state for password visibility
 
   const [fullName, setFullName] = useState("");
   const [dojo, setDojo] = useState("");
@@ -142,6 +143,7 @@ export default function RegisterPage() {
         email,
         full_name: fullName,
         dojo,
+        dojo,
         belt_rank: beltRank,
         gender,
         age,
@@ -201,81 +203,113 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <input type="password" placeholder="Password" value={password}
+            
+            <input 
+              type={showPassword ? "text" : "password"} // Toggle input type
+              placeholder="Password" 
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={inputStyle} required />
+              className={`${inputStyle} pr-12`} // Added pr-12 so text doesn't hide behind the button
+              required 
+            />
+
+            {/* Password Hide/Unhide Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showPassword ? (
+                // Replace this with your UNHIDE/OPEN EYE image path
+                <Image 
+                  src="/images/eye.png" 
+                  alt="Hide password" 
+                  width={20} 
+                  height={20} 
+                  className="object-contain" 
+                />
+              ) : (
+                // Replace this with your HIDE/CLOSED EYE image path
+                <Image 
+                  src="/images/eye-off.png" 
+                  alt="Show password" 
+                  width={20} 
+                  height={20} 
+                  className="object-contain" 
+                />
+              )}
+            </button>
           </div>
 
           {/* Player Specific Fields */}
-          
-            <>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <input placeholder="Full Name" value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className={inputStyle} required />
+          <>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
               </div>
+              <input placeholder="Full Name" value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className={inputStyle} required />
+            </div>
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <input placeholder="Dojo / Club" value={dojo}
-                  onChange={(e) => setDojo(e.target.value)}
-                  className={inputStyle} />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
               </div>
+              <input placeholder="Dojo / Club" value={dojo}
+                onChange={(e) => setDojo(e.target.value)}
+                className={inputStyle} />
+            </div>
 
-              <div className="flex gap-3">
-                <input type="date" value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className={inputStyleNoIcon} required />
+            <div className="flex gap-3">
+              <input type="date" value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className={inputStyleNoIcon} required />
 
-                <input placeholder="Instructor" value={instructor}
-                  onChange={(e) => setInstructor(e.target.value)}
-                  className={inputStyleNoIcon} required />
-              </div>
+              <input placeholder="Instructor" value={instructor}
+                onChange={(e) => setInstructor(e.target.value)}
+                className={inputStyleNoIcon} required />
+            </div>
 
-              <div className="flex gap-3">
-                <select value={beltRank}
-                  onChange={(e) => setBeltRank(e.target.value)}
-                  className={inputStyleNoIcon} required>
-                  <option value="" disabled>Belt Rank</option>
-                  <option>White</option>
-                  <option>Yellow</option>
-                  <option>Green</option>
-                  <option>Blue</option>
-                  <option>Brown</option>
-                  <option>Black</option>
-                </select>
+            <div className="flex gap-3">
+              <select value={beltRank}
+                onChange={(e) => setBeltRank(e.target.value)}
+                className={inputStyleNoIcon} required>
+                <option value="" disabled>Belt Rank</option>
+                <option>White</option>
+                <option>Yellow</option>
+                <option>Green</option>
+                <option>Blue</option>
+                <option>Brown</option>
+                <option>Black</option>
+              </select>
 
-                <select value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className={inputStyleNoIcon} required>
-                  <option value="" disabled>Gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                  <option>Prefer not to say</option>
-                </select>
-              </div>
+              <select value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className={inputStyleNoIcon} required>
+                <option value="" disabled>Gender</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Prefer not to say</option>
+              </select>
+            </div>
 
-              <div className="mt-1">
-                <label className="block text-xs font-semibold text-gray-500 mb-1 ml-1">Upload Certificate</label>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setCertificate(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all border border-gray-100 rounded-xl bg-gray-50"
-                  required
-                />
-              </div>
-            </>
+            <div className="mt-1">
+              <label className="block text-xs font-semibold text-gray-500 mb-1 ml-1">Upload Certificate</label>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setCertificate(e.target.files?.[0] || null)}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-all border border-gray-100 rounded-xl bg-gray-50"
+                required
+              />
+            </div>
+          </>
 
           {/* Submit Button */}
           <button type="submit" disabled={loading}
