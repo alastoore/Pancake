@@ -32,7 +32,7 @@ export default function RegisterChoicePage() {
         {/* Player */}
         <Link 
           href="/register/player_form"
-          className="flex flex-col bg-cover bg-center p-8 w-full md:w-64 rounded-2xl border-2 border-red-600 shadow-xl hover:scale-105 transition-transform"
+          className="flex flex-col bg-cover bg-center p-8 w-full md:w-64 rounded-2xl border-2 border-zinc-800 shadow-xl hover:scale-105 hover:border-red-600 transition-all duration-300"
           style={{ backgroundImage: "url('/images/player-bg.png')", backgroundColor: "#111111" }}
         >
           <div className="mb-6 h-16 w-16 relative">
@@ -56,7 +56,7 @@ export default function RegisterChoicePage() {
         {/* Organizer */}
         <Link 
           href="/register/organizer_form"
-          className="flex flex-col bg-cover bg-center p-8 w-full md:w-64 rounded-2xl border-2 border-transparent shadow-xl hover:scale-105 hover:border-gray-700 transition-all"
+          className="flex flex-col bg-cover bg-center p-8 w-full md:w-64 rounded-2xl border-2 border-zinc-800 shadow-xl hover:scale-105 hover:border-red-600 transition-all duration-300"
           style={{ backgroundImage: "url('/images/organizer-bg.png')", backgroundColor: "#111111" }}
         >
           <div className="mb-6 h-16 w-16 relative">
