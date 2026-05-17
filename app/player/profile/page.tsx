@@ -30,10 +30,9 @@ type Profile = {
   full_name: string;
   dojo: string;
   belt_rank: string;
-  dob: string;
+  age: number;
   gender: string;
   status: string;
-  category?: string;
   email?: string;
   certificate_url?: string;
   instructor?: string;
@@ -84,7 +83,7 @@ export default function PlayerProfilePage() {
         email: user.email,
       });
 
-      const joinResult = await supabase
+      const joinResult = await (supabase as any)
         .from("player_tourna")
         .select("tournament_id, selected_category, status")
         .eq("player_id", user.id)
@@ -255,8 +254,8 @@ export default function PlayerProfilePage() {
               <p className="font-bold text-gray-800">{profile.belt_rank || "N/A"}</p>
             </div>
             <div className="text-center md:text-left">
-              <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Category</p>
-              <p className="font-bold text-gray-800">{profile.category || "N/A"}</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Age</p>
+              <p className="font-bold text-gray-800">{profile.age || "N/A"}</p>
             </div>
             <div className="text-center md:text-left">
               <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Gender</p>

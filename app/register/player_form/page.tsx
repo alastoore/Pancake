@@ -117,7 +117,7 @@ export default function RegisterPage() {
     }
 
     // 🔥 SAVE TO BASE PROFILES TABLE FIRST
-    const { error: baseProfileError } = await supabase
+    const { error: baseProfileError } = await (supabase as any)
       .from("profiles")
       .upsert({
         id: user.id,
@@ -135,7 +135,7 @@ export default function RegisterPage() {
     const age = calculateAge(dob)
 
     // 🔥 SAVE PROFILE
-    const { error: profileError } = await supabase
+    const { error: profileError } = await (supabase as any)
       .from("player_profiles")
       .upsert({
         id: user.id,

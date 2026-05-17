@@ -118,6 +118,7 @@ export default function OrganizerRegisterPage() {
       .from("organizer_profiles")
       .upsert({
         id: user.id,
+        email,
         username,
         dob, 
         organization_name: orgName,
