@@ -78,7 +78,7 @@ export default function AdminVerifyPage() {
     organizerId: string,
     nextStatus: Exclude<VerificationStatus, "pending">
   ) => {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("organizer_profiles")
       .update({ status: nextStatus })
       .eq("id", organizerId);

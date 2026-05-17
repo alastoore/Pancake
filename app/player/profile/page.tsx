@@ -65,7 +65,7 @@ export default function PlayerProfilePage() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("player_profiles")
         .select("*")
         .eq("id", user.id)

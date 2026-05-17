@@ -39,7 +39,7 @@ export default function AdminVerifyPage() {
   // 🔥 FETCH REAL PLAYERS
   useEffect(() => {
     const fetchPlayers = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("player_profiles")
         .select("*")
         .eq("status", "pending");
@@ -78,7 +78,7 @@ export default function AdminVerifyPage() {
     playerId: string,
     nextStatus: Exclude<VerificationStatus, "pending">
   ) => {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("player_profiles")
       .update({ status: nextStatus })
       .eq("id", playerId);
