@@ -355,7 +355,7 @@ export default function EventDashboardPage() {
       status: asNullableString(editForm.status) ?? "draft",
     };
 
-    let updatePayload = { ...payload };
+    const updatePayload = { ...payload };
     let error: { message: string } | null = null;
 
     while (Object.keys(updatePayload).length > 0) {

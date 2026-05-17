@@ -45,7 +45,7 @@ export default function PlayerProfilePage() {
 
       if (!user) return;
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("organizer_profiles")
         .select("*")
         .eq("id", user.id)

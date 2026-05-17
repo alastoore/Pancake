@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
+type OrganizerProfileRow = {
+  username: string | null;
+  organization_name: string | null;
+  position: string | null;
+  dob: string | null;
+  location: string | null;
+};
+
 export default function EditProfilePage() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
@@ -30,11 +38,11 @@ export default function EditProfilePage() {
 
       if (!user) return;
 
-      const { data, error } = await (supabase as any)
-        .from("player_profiles")
-        .select("*")
+      const { data, error } = await supabase
+        .from("organizer_profiles")
+        .select("username, organization_name, position, dob, location")
         .eq("id", user.id)
-        .single();
+        .single<OrganizerProfileRow>();
 
       if (error) {
         console.error(error.message);
@@ -42,19 +50,19 @@ export default function EditProfilePage() {
       }
 
       setUsername(data.username || "");
-      setOrg(data.orgName || "");
+      setOrg(data.organization_name || "");
       setPos(data.position || "");
       setDob(data.dob || "");
       setLoc(data.location || "");
     };
 
     fetchProfile();
-  }, []);
+  }, [supabase]);
 
   // 🔥 SAVE TO DATABASE
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    loading || setLoading(true);
+    setLoading(true);
 
     const { data: userData } = await supabase.auth.getUser();
     const user = userData?.user;
@@ -64,7 +72,7 @@ export default function EditProfilePage() {
       return;
     }
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("organizer_profiles")
       .update({
         username,

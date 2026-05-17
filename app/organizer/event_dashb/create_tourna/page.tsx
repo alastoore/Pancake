@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import type { User } from "@supabase/supabase-js";
 import { 
-  ChevronLeft, 
   ChevronDown, 
   CalendarDays, 
   MapPin, 
@@ -147,7 +147,7 @@ export default function CreateTournamentPage() {
   const supabase = getSupabaseBrowserClient();
 
   // AUTH & STATE
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TournamentData>(initialData);
@@ -226,7 +226,7 @@ export default function CreateTournamentPage() {
       status: "draft",
     };
 
-    let insertPayload = { ...payload };
+    const insertPayload = { ...payload };
     let error: { message: string } | null = null;
 
     // If the local code and Supabase table drift, strip unknown columns one by one

@@ -18,6 +18,18 @@ type PlayerVerification = {
   status: VerificationStatus;
 };
 
+type PlayerProfileRow = {
+  id: string;
+  full_name: string | null;
+  dojo: string | null;
+  belt_rank: string | null;
+  instructor: string | null;
+  dob: string | null;
+  certificate_url: string | null;
+  created_at?: string | null;
+  status: VerificationStatus;
+};
+
 export default function AdminVerifyPage() {
   const supabase = getSupabaseBrowserClient();
 
@@ -37,15 +49,15 @@ export default function AdminVerifyPage() {
         return;
       }
 
-      const formatted = data.map((p: any) => ({
+      const formatted = (data as PlayerProfileRow[]).map((p) => ({
         id: p.id,
-        name: p.full_name,
-        dojo: p.dojo,
-        beltRank: p.belt_rank,
-        instructor: p.instructor,
-        dob: p.dob,
-        certificate_url: p.certificate_url,
-        submittedAt: p.created_at,
+        name: p.full_name || "Unnamed Player",
+        dojo: p.dojo || "Not set",
+        beltRank: p.belt_rank || "Not set",
+        instructor: p.instructor || "Not set",
+        dob: p.dob || "Not set",
+        certificate_url: p.certificate_url || undefined,
+        submittedAt: p.created_at || undefined,
         status: p.status,
       }));
 
@@ -54,7 +66,7 @@ export default function AdminVerifyPage() {
     };
 
     fetchPlayers();
-  }, []);
+  }, [supabase]);
 
   const pendingCount = useMemo(
     () => players.filter((player) => player.status === "pending").length,
@@ -66,7 +78,7 @@ export default function AdminVerifyPage() {
     playerId: string,
     nextStatus: Exclude<VerificationStatus, "pending">
   ) => {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("player_profiles")
       .update({ status: nextStatus })
       .eq("id", playerId);

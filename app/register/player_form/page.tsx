@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { Montserrat } from "next/font/google";
 import Link from "next/link";
@@ -28,7 +28,6 @@ function calculateAge(dob: string): number { // calculate player's age
 }
 
 export default function RegisterPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
 
@@ -118,7 +117,7 @@ export default function RegisterPage() {
     }
 
     // 🔥 SAVE TO BASE PROFILES TABLE FIRST
-    const { error: baseProfileError } = await (supabase as any)
+    const { error: baseProfileError } = await supabase
       .from("profiles")
       .upsert({
         id: user.id,
@@ -136,13 +135,12 @@ export default function RegisterPage() {
     const age = calculateAge(dob)
 
     // 🔥 SAVE PROFILE
-    const { error: profileError } = await (supabase as any)
+    const { error: profileError } = await supabase
       .from("player_profiles")
       .upsert({
         id: user.id,
         email,
         full_name: fullName,
-        dojo,
         dojo,
         belt_rank: beltRank,
         gender,

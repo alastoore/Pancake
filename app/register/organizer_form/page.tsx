@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import type { User } from "@supabase/supabase-js";
 
 export default function OrganizerRegisterPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function OrganizerRegisterPage() {
       return;
     }
 
-    let user = data.user;
+    let user: User | null = data.user;
     if (!user) {
       const { data: existing } = await supabase.auth.getUser();
       user = existing?.user;
@@ -113,11 +114,10 @@ export default function OrganizerRegisterPage() {
     }
 
     // 3. SAVE ORGANIZER PROFILE
-    const { error: orgError } = await (supabase as any)
+    const { error: orgError } = await supabase
       .from("organizer_profiles")
       .upsert({
         id: user.id,
-        email, 
         username,
         dob, 
         organization_name: orgName,
