@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { getSupabaseBrowserClient, Database } from "@/lib/supabase/browser-client";
 import { useEffect, useState } from "react";
 
 type UserProfile = {
@@ -49,6 +49,11 @@ type EditableTournament = {
   allow_kata: boolean;
   allow_kumite: boolean;
 };
+
+interface PlayerTournaRow { //for properties on type "never"
+  tournament_id: number;
+  status: string;
+}
 
 function asText(value: unknown) {
   return typeof value === "string" ? value : null;
@@ -278,7 +283,10 @@ export default function EventDashboardPage() {
       return;
     }
 
-    const counts = (data ?? []).reduce<Record<number, number>>((accumulator, row) => {
+    // Explicitly cast data as PlayerTournaRow[] to clear the 'never' type error
+    const rows = (data as PlayerTournaRow[]) ?? [];
+
+    const counts = rows.reduce<Record<number, number>>((accumulator, row) => {
       const tournamentId =
         typeof row.tournament_id === "number" ? row.tournament_id : null;
       const status = typeof row.status === "string" ? row.status : "joined";
@@ -403,7 +411,10 @@ export default function EventDashboardPage() {
 
     setSavingEdit(true);
 
-    const payload: Record<string, string | number | null> = {
+    // 1. Maintain the precise Supabase Update type definition
+    type TournamentUpdatePayload = Database["public"]["Tables"]["tournaments"]["Update"];
+
+    const payload: TournamentUpdatePayload = {
       tournament_name: editForm.tournament_name.trim(),
       sport: asNullableString(editForm.sport),
       tournament_type: asNullableString(editForm.tournament_type),
@@ -423,12 +434,11 @@ export default function EventDashboardPage() {
       allow_kumite: editForm.allow_kumite,
     };
 
-    const updatePayload = { ...payload };
+    const updatePayload = { ...payload } as TournamentUpdatePayload;
     let error: { message: string } | null = null;
 
     while (Object.keys(updatePayload).length > 0) {
-      const result = await supabase
-        .from("tournaments")
+      const result = await (supabase.from("tournaments") as any)
         .update(updatePayload)
         .eq("id", editingEvent.id)
         .eq("organizer_id", organizerId);
@@ -449,7 +459,7 @@ export default function EventDashboardPage() {
         break;
       }
 
-      delete updatePayload[missingColumn];
+      delete updatePayload[missingColumn as keyof TournamentUpdatePayload];
     }
 
     if (error) {
@@ -458,7 +468,7 @@ export default function EventDashboardPage() {
       return;
     }
 
-    const organizerMirrorUpdate = await supabase
+    const organizerMirrorUpdate = await (supabase as any)
       .from("organizer_tourna")
       .update({
         tourna_name: editForm.tournament_name.trim(),
