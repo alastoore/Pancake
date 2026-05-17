@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Home(): JSX.Element {
+export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[url('/welcome-bg.png')] bg-cover bg-center bg-no-repeat">
       
