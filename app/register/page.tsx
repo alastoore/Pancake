@@ -98,8 +98,13 @@ export default function RegisterChoicePage() {
             mb-3
           "
           style={{
-            // Only a single dark shadow for crisp, non-trippy text
-            textShadow: "0 4px 12px rgba(0, 0, 0, 0.9)",
+            textShadow: `
+              0 0 6px rgba(255, 255, 255, 0.8),
+              0 0 12px rgba(255, 255, 255, 0.7),
+              0 0 24px rgba(255, 255, 255, 0.6),
+              0 0 48px rgba(255, 255, 255, 0.4),
+              0 4px 12px rgba(0, 0, 0, 0.9)
+            `,
           }}
         >
           ENTER THE ARENA
@@ -108,7 +113,10 @@ export default function RegisterChoicePage() {
         <p
           className="text-white font-extrabold italic text-sm md:text-base tracking-widest"
           style={{
-            textShadow: "0 2px 6px rgba(0, 0, 0, 0.9)",
+            textShadow: `
+              0 0 4px rgba(255, 255, 255, 0.6),
+              0 2px 6px rgba(0, 0, 0, 0.9)
+            `,
           }}
         >
           Compete. Rise. Dominate.
