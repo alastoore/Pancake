@@ -22,8 +22,9 @@ export default function Home() {
             href="/register" 
             className="w-72 md:w-80 flex items-center bg-white px-6 py-3.5 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition"
           >
-            <img src="/sign-up-icon.png" alt="Sign Up Icon" className="w-6 h-6 object-contain" />
-            <span className="flex-1 text-center text-[#e60000] text-lg font-semibold pr-6">
+            {/* Updated size classes and added shrink-0 here */}
+            <img src="/sign-up-icon.png" alt="Sign Up Icon" className="w-8 h-8 shrink-0 object-contain" />
+            <span className="flex-1 text-center text-[#e60000] text-lg font-semibold pr-8">
               Register / Sign-up
             </span>
           </Link>
@@ -32,8 +33,9 @@ export default function Home() {
             href="/login" 
             className="w-72 md:w-80 flex items-center bg-white px-6 py-3.5 rounded-lg shadow-lg hover:scale-105 active:scale-95 transition"
           >
-            <img src="/login-icon.png" alt="Login Icon" className="w-6 h-6 object-contain opacity-80" />
-            <span className="flex-1 text-center text-gray-800 text-lg font-semibold pr-6">
+            {/* Updated size classes and added shrink-0 here */}
+            <img src="/login-icon.png" alt="Login Icon" className="w-8 h-8 shrink-0 object-contain opacity-80" />
+            <span className="flex-1 text-center text-gray-800 text-lg font-semibold pr-8">
               Log in
             </span>
           </Link>
