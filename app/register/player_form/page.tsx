@@ -136,7 +136,7 @@ export default function RegisterPage() {
 
     // 🔥 SAVE PROFILE
     const { error: profileError } = await (supabase as any)
-      .from("player_profiles")
+      .from("player_profiles")  
       .upsert({
         id: user.id,
         email,
@@ -227,7 +227,7 @@ export default function RegisterPage() {
                   className="object-contain" 
                 />
               ) : (
-                // Replace this with your HIDE/CLOSED EYE image path
+                
                 <Image 
                   src="/images/eye-off.png" 
                   alt="Show password" 
@@ -271,7 +271,7 @@ export default function RegisterPage() {
 
               <input placeholder="Instructor" value={instructor}
                 onChange={(e) => setInstructor(e.target.value)}
-                className={inputStyleNoIcon} required />
+                className={inputStyleNoIcon}  />
             </div>
 
             <div className="flex gap-3">

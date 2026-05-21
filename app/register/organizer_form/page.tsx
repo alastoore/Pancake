@@ -171,7 +171,7 @@ export default function OrganizerRegisterPage() {
                 placeholder="Organization / Dojo Name" 
                 value={orgName} 
                 onChange={(e) => setOrgName(e.target.value)} 
-                className={inputStyleWithIcon} required 
+                className={inputStyleWithIcon} 
               />
             </div>
 
@@ -282,6 +282,7 @@ export default function OrganizerRegisterPage() {
               <option value="" disabled className="text-gray-400">Federation</option>
               <option value="OSSA">OSSA</option>
               <option value="PKF">PKF</option>
+              <option value="WKF">WKF</option>
               <option value="Independent">Independent</option>
             </select>
           </div>
