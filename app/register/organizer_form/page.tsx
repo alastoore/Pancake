@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import type { User } from "@supabase/supabase-js";
 
 export default function OrganizerRegisterPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function OrganizerRegisterPage() {
       return;
     }
 
-    let user = data.user;
+    let user: User | null = data.user;
     if (!user) {
       const { data: existing } = await supabase.auth.getUser();
       user = existing?.user;
@@ -117,7 +118,7 @@ export default function OrganizerRegisterPage() {
       .from("organizer_profiles")
       .upsert({
         id: user.id,
-        email, 
+        email,
         username,
         dob, 
         organization_name: orgName,
@@ -170,7 +171,7 @@ export default function OrganizerRegisterPage() {
                 placeholder="Organization / Dojo Name" 
                 value={orgName} 
                 onChange={(e) => setOrgName(e.target.value)} 
-                className={inputStyleWithIcon} required 
+                className={inputStyleWithIcon} 
               />
             </div>
 
@@ -281,6 +282,7 @@ export default function OrganizerRegisterPage() {
               <option value="" disabled className="text-gray-400">Federation</option>
               <option value="OSSA">OSSA</option>
               <option value="PKF">PKF</option>
+              <option value="WKF">WKF</option>
               <option value="Independent">Independent</option>
             </select>
           </div>

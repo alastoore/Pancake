@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
-// --- DATA ---
 const playerStats = [
   { label: "Matches Played", value: "24", icon: "/images/trophy-icon.png" },
   { label: "Win Rate", value: "72%", icon: "/images/medal-icon.png" },
@@ -26,20 +25,42 @@ const upcomingMatches = [
   },
 ];
 
-// --- TYPE ---
 type Profile = {
   id: string;
   full_name: string;
   dojo: string;
   belt_rank: string;
-  dob: string;
+  age: number;
   gender: string;
   status: string;
-  category?: string;
   email?: string;
   certificate_url?: string;
   instructor?: string;
 };
+
+type JoinedTournament = {
+  id: number;
+  tournament_name: string | null;
+  sport: string | null;
+  start_date: string | null;
+  max_participants: number | null;
+  selected_category: string | null;
+};
+
+interface PlayerTournaRow {
+  tournament_id: number;
+  selected_category?: string | null;
+  status: string;
+  player_id?: string;
+}
+
+interface TournamentRow {
+  id: number;
+  tournament_name: string;
+  sport: string;
+  start_date: string | null;
+  max_participants: number | null;
+}
 
 export default function PlayerProfilePage() {
   const supabase = getSupabaseBrowserClient();
@@ -47,15 +68,19 @@ export default function PlayerProfilePage() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [certificateUrl, setCertificateUrl] = useState<string | null>(null);
+  const [joinedTournaments, setJoinedTournaments] = useState<JoinedTournament[]>([]);
+  const [joinedCounts, setJoinedCounts] = useState<Record<number, number>>({});
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    async function fetchProfile() {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData?.user;
 
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("player_profiles")
         .select("*")
         .eq("id", user.id)
@@ -73,11 +98,82 @@ export default function PlayerProfilePage() {
         email: user.email,
       });
 
+      const joinResult = await (supabase as any)
+        .from("player_tourna")
+        .select("tournament_id, selected_category, status")
+        .eq("player_id", user.id)
+        .eq("status", "joined");
+
+      if (!joinResult.error) {
+        const joinedRows = (joinResult.data as PlayerTournaRow[]) ?? [];
+        const tournamentIds = joinedRows
+          .map((row) => row.tournament_id)
+          .filter((id): id is number => typeof id === "number");
+
+        if (tournamentIds.length > 0) {
+          const tournamentsResult = await (supabase as any)
+            .from("tournaments")
+            .select("id, tournament_name, sport, start_date, max_participants")
+            .in("id", tournamentIds);
+
+          if (!tournamentsResult.error) {
+            const tournamentsData = (tournamentsResult.data as TournamentRow[]) ?? [];
+
+            const merged = tournamentIds.map((tournamentId) => {
+              const tournament = tournamentsData.find(
+                (entry) => entry.id === tournamentId
+              );
+              const joinRow = joinedRows.find(
+                (entry) => entry.tournament_id === tournamentId
+              );
+
+              return {
+                id: tournamentId,
+                tournament_name: tournament?.tournament_name ?? "Untitled Tournament",
+                sport: tournament?.sport ?? "General",
+                start_date: tournament?.start_date ?? null,
+                max_participants: tournament?.max_participants ?? null,
+                selected_category:
+                  typeof joinRow?.selected_category === "string"
+                    ? joinRow.selected_category
+                    : null,
+              };
+            });
+
+            setJoinedTournaments(merged);
+          }
+        }
+      }
+
+      const countResult = await supabase
+        .from("player_tourna")
+        .select("tournament_id, status");
+
+      if (!countResult.error) {
+        const countRows = (countResult.data as PlayerTournaRow[]) ?? [];
+
+        const counts = countRows.reduce<Record<number, number>>(
+          (accumulator, row) => {
+            const tournamentId =
+              typeof row.tournament_id === "number" ? row.tournament_id : null;
+            const status = typeof row.status === "string" ? row.status : "joined";
+
+            if (tournamentId !== null && status === "joined") {
+              accumulator[tournamentId] = (accumulator[tournamentId] ?? 0) + 1;
+            }
+
+            return accumulator;
+          },
+          {}
+        );
+
+        setJoinedCounts(counts);
+      }
+
       if (typedData?.certificate_url) {
-        const { data: signedData, error: signedError } =
-          await supabase.storage
-            .from("certificates")
-            .createSignedUrl(typedData.certificate_url, 3600);
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from("certificates")
+          .createSignedUrl(typedData.certificate_url, 3600);
 
         if (signedError) {
           console.error("SIGNED URL ERROR:", signedError.message);
@@ -85,14 +181,25 @@ export default function PlayerProfilePage() {
           setCertificateUrl(signedData.signedUrl);
         }
       }
-    };
+    }
 
-    fetchProfile();
-  }, []);
+    void fetchProfile();
+  }, [supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
+  };
+
+  const getSlotsLeft = (tournament: JoinedTournament) => {
+    if (tournament.max_participants === null) {
+      return "Open capacity";
+    }
+
+    return `${Math.max(
+      tournament.max_participants - (joinedCounts[tournament.id] ?? 0),
+      0
+    )} left`;
   };
 
   if (!profile) {
@@ -104,21 +211,21 @@ export default function PlayerProfilePage() {
   }
 
   return (
-    <main 
+    <main
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed pb-20 flex flex-col items-center"
       style={{ backgroundImage: "url('/images/bg-arena.png')" }}
     >
-      {/* HEADER SECTION - Shadows added for readability without the dark overlay */}
       <div className="relative z-10 pt-12 pb-8 text-center text-white">
-        <h1 className="text-4xl font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">Player Profile</h1>
-        <p className="opacity-100 mt-2 text-lg font-medium drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)]">Track your performance and tournaments</p>
+        <h1 className="text-4xl font-black tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+          Player Profile
+        </h1>
+        <p className="opacity-100 mt-2 text-lg font-medium drop-shadow-[0_2px_5px_rgba(0,0,0,0.5)]">
+          Track your performance and tournaments
+        </p>
       </div>
 
       <div className="relative z-10 w-full max-w-5xl px-4">
-        {/* MAIN PROFILE CARD */}
         <div className="bg-white/95 backdrop-blur-md shadow-2xl rounded-[40px] p-8 md:p-12 mb-12 border border-white/40">
-          
-          {/* HEADER AREA */}
           <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="w-32 h-32 rounded-full border-4 border-white shadow-xl overflow-hidden bg-white">
@@ -139,17 +246,16 @@ export default function PlayerProfilePage() {
                 </p>
               </div>
             </div>
-            
-            {/* LINKS */}
+
             <div className="flex flex-col items-center md:items-end gap-2">
-              <Link 
-                href="/player/event_browsing" 
+              <Link
+                href="/player/event_browsing"
                 className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1"
               >
-                ← Back to Dashboard
+                Back to Dashboard
               </Link>
-              <button 
-                onClick={handleSignOut} 
+              <button
+                onClick={handleSignOut}
                 className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors uppercase tracking-tighter"
               >
                 Sign Out
@@ -157,7 +263,6 @@ export default function PlayerProfilePage() {
             </div>
           </div>
 
-          {/* PLAYER INFO GRID */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12 border-y py-8 border-gray-100">
             <div className="text-center md:text-left">
               <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Dojo</p>
@@ -168,8 +273,8 @@ export default function PlayerProfilePage() {
               <p className="font-bold text-gray-800">{profile.belt_rank || "N/A"}</p>
             </div>
             <div className="text-center md:text-left">
-              <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Category</p>
-              <p className="font-bold text-gray-800">{profile.category || "N/A"}</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Age</p>
+              <p className="font-bold text-gray-800">{profile.age || "N/A"}</p>
             </div>
             <div className="text-center md:text-left">
               <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Gender</p>
@@ -181,10 +286,12 @@ export default function PlayerProfilePage() {
             </div>
           </div>
 
-          {/* STATS GRID */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
             {playerStats.map((stat) => (
-              <div key={stat.label} className="bg-gray-50/50 border border-gray-100 p-6 rounded-[24px] text-center shadow-sm hover:shadow-md transition-shadow">
+              <div
+                key={stat.label}
+                className="bg-gray-50/50 border border-gray-100 p-6 rounded-[24px] text-center shadow-sm hover:shadow-md transition-shadow"
+              >
                 <img src={stat.icon} alt={stat.label} className="w-8 h-8 mx-auto mb-3" />
                 <p className="text-2xl font-black text-gray-800">{stat.value}</p>
                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tight">{stat.label}</p>
@@ -192,7 +299,6 @@ export default function PlayerProfilePage() {
             ))}
           </div>
 
-          {/* EDIT BUTTONS */}
           <div className="space-y-5">
             <Link
               href="/player/profile/edit"
@@ -200,7 +306,7 @@ export default function PlayerProfilePage() {
             >
               Edit Profile
             </Link>
-            
+
             {certificateUrl && (
               <div className="text-center">
                 <a
@@ -216,26 +322,63 @@ export default function PlayerProfilePage() {
           </div>
         </div>
 
-        {/* UPCOMING EVENTS SECTION */}
         <section>
-          <h3 className="text-2xl font-black text-white text-center mb-8 uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">Upcoming Tournaments</h3>
+          <h3 className="text-2xl font-black text-white text-center mb-8 uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+            Joined Tournaments
+          </h3>
           <div className="grid md:grid-cols-2 gap-6">
-            {upcomingMatches.map((match, i) => (
-              <div key={i} className="bg-white/95 backdrop-blur-sm rounded-full p-4 pl-8 flex items-center justify-between shadow-2xl border border-white">
-                <div className="flex items-center gap-5">
-                  <div className="bg-red-50 p-2.5 rounded-full shadow-inner">
-                    <img src="/images/kick-icon.png" className="w-8 h-8" alt="sport" />
+            {joinedTournaments.length > 0 ? (
+              joinedTournaments.map((match) => (
+                <div
+                  key={match.id}
+                  className="bg-white/95 backdrop-blur-sm rounded-full p-4 pl-8 flex items-center justify-between shadow-2xl border border-white"
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="bg-red-50 p-2.5 rounded-full shadow-inner">
+                      <img src="/images/kick-icon.png" className="w-8 h-8" alt="sport" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 text-lg leading-tight">
+                        {match.tournament_name}
+                      </h4>
+                      <p className="text-xs text-gray-500 font-bold uppercase">
+                        {match.sport} • {match.start_date || "Date not set"}
+                      </p>
+                      <p className="text-[10px] text-red-600 font-bold uppercase mt-1">
+                        {match.selected_category || "Joined"} • {getSlotsLeft(match)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-lg leading-tight">{match.event}</h4>
-                    <p className="text-xs text-gray-500 font-bold uppercase">{match.sport} • {match.date}</p>
+                  <div className="pr-8">
+                    <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                   </div>
                 </div>
-                <div className="pr-8">
-                   <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+              ))
+            ) : (
+              upcomingMatches.map((match, i) => (
+                <div
+                  key={i}
+                  className="bg-white/95 backdrop-blur-sm rounded-full p-4 pl-8 flex items-center justify-between shadow-2xl border border-white"
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="bg-red-50 p-2.5 rounded-full shadow-inner">
+                      <img src="/images/kick-icon.png" className="w-8 h-8" alt="sport" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 text-lg leading-tight">
+                        {match.event}
+                      </h4>
+                      <p className="text-xs text-gray-500 font-bold uppercase">
+                        {match.sport} • {match.date}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pr-8">
+                    <div className="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       </div>

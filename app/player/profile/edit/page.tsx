@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
+type PlayerProfileRow = {
+  full_name: string | null;
+  dojo: string | null;
+  instructor: string | null;
+  dob: string | null;
+};
+
 export default function EditProfilePage() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
@@ -30,22 +37,22 @@ export default function EditProfilePage() {
 
       if (!user) return;
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("player_profiles")
-        .select("*")
+        .select("full_name, dojo, instructor, dob")
         .eq("id", user.id)
-        .single();
+        .single<PlayerProfileRow>();
 
       if (error) {
         console.error(error.message);
         return;
       }
 
-      setUsername(data.username || "");
-      setOrg(data.orgName || "");
-      setPos(data.position || "");
+      setUsername(data.full_name || "");
+      setOrg(data.dojo || "");
+      setPos(data.instructor || "");
       setDob(data.dob || "");
-      setLoc(data.location || "");
+      setLoc("");
     };
 
     fetchProfile();
@@ -65,13 +72,12 @@ export default function EditProfilePage() {
     }
 
     const { error } = await (supabase as any)
-      .from("organizer_profiles")
+      .from("player_profiles")
       .update({
-        username,
-        organization_name: orgName,
+        full_name: username,
+        dojo: orgName,
         dob,
-        position,
-        location,
+        instructor: position,
       })
       .eq("id", user.id);
 

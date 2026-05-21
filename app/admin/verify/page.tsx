@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+export const dynamic = "force-dynamic"; // force next.js to treat page as dynamic runtime only
 
 type VerificationStatus = "pending" | "verified" | "rejected";
 
@@ -18,6 +19,18 @@ type PlayerVerification = {
   status: VerificationStatus;
 };
 
+type PlayerProfileRow = {
+  id: string;
+  full_name: string | null;
+  dojo: string | null;
+  belt_rank: string | null;
+  instructor: string | null;
+  dob: string | null;
+  certificate_url: string | null;
+  created_at?: string | null;
+  status: VerificationStatus;
+};
+
 export default function AdminVerifyPage() {
   const supabase = getSupabaseBrowserClient();
 
@@ -27,7 +40,7 @@ export default function AdminVerifyPage() {
   // 🔥 FETCH REAL PLAYERS
   useEffect(() => {
     const fetchPlayers = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("player_profiles")
         .select("*")
         .eq("status", "pending");
@@ -37,15 +50,15 @@ export default function AdminVerifyPage() {
         return;
       }
 
-      const formatted = data.map((p: any) => ({
+      const formatted = (data as PlayerProfileRow[]).map((p) => ({
         id: p.id,
-        name: p.full_name,
-        dojo: p.dojo,
-        beltRank: p.belt_rank,
-        instructor: p.instructor,
-        dob: p.dob,
-        certificate_url: p.certificate_url,
-        submittedAt: p.created_at,
+        name: p.full_name || "Unnamed Player",
+        dojo: p.dojo || "Not set",
+        beltRank: p.belt_rank || "Not set",
+        instructor: p.instructor || "Not set",
+        dob: p.dob || "Not set",
+        certificate_url: p.certificate_url || undefined,
+        submittedAt: p.created_at || undefined,
         status: p.status,
       }));
 
@@ -54,7 +67,7 @@ export default function AdminVerifyPage() {
     };
 
     fetchPlayers();
-  }, []);
+  }, [supabase]);
 
   const pendingCount = useMemo(
     () => players.filter((player) => player.status === "pending").length,

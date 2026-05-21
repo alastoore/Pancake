@@ -1,18 +1,11 @@
 "use client";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
-import { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; // ✅ Import Link
+import { useState } from "react";
 
-type EmailPasswordDemoProps = {
-  user?: User | null;
-};
-
-export default function EmailPasswordDemo({
-  user = null,
-}: EmailPasswordDemoProps) {
+export default function EmailPasswordDemo() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
 
@@ -21,19 +14,7 @@ export default function EmailPasswordDemo({
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(user);
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -91,6 +72,31 @@ export default function EmailPasswordDemo({
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setStatus("Enter your email first so we know where to send the reset link.");
+      return;
+    }
+
+    setForgotPasswordLoading(true);
+    setStatus("");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setStatus(error.message);
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    setStatus("We sent a password reset link to your email.");
+    setForgotPasswordLoading(false);
+  }
+
+  const isSuccess = status.toLowerCase().includes("sent");
+
   return (
     <div className="rounded-[20px] bg-white px-8 py-9 shadow-[0_18px_40px_rgba(0,0,0,0.25)]">
       <h2 className="mb-7 text-center text-[2rem] font-extrabold text-black">
@@ -106,9 +112,9 @@ export default function EmailPasswordDemo({
             type="email"
             placeholder="Enter your Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             required
-            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500 text-gray-900 placeholder:text-gray-400"
+            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 text-gray-900 outline-none placeholder:text-gray-400 focus:border focus:border-red-500"
           />
         </div>
 
@@ -120,20 +126,36 @@ export default function EmailPasswordDemo({
             type="password"
             placeholder="Enter your password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             required
-            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 outline-none focus:border focus:border-red-500 text-gray-900 placeholder:text-gray-400"
+            className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 text-gray-900 outline-none placeholder:text-gray-400 focus:border focus:border-red-500"
           />
+          <div className="mt-2 text-right">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={forgotPasswordLoading}
+              className="text-sm font-semibold text-red-600 underline transition-colors hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {forgotPasswordLoading ? "Sending reset link..." : "Forgot your password?"}
+            </button>
+          </div>
         </div>
 
         {status && (
-          <p className="text-sm font-medium text-red-600">{status}</p>
+          <p
+            className={`text-sm font-medium ${
+              isSuccess ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {status}
+          </p>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 h-12 w-full rounded-xl bg-[#d62828] text-lg font-bold text-white shadow-md hover:bg-[#bb1f1f] cursor-pointer"
+          className="mt-2 h-12 w-full cursor-pointer rounded-xl bg-[#d62828] text-lg font-bold text-white shadow-md hover:bg-[#bb1f1f]"
         >
           {loading ? "LOGGING IN..." : "LOG IN"}
         </button>
@@ -142,21 +164,16 @@ export default function EmailPasswordDemo({
       <button
         onClick={handleGoogleLogin}
         disabled={googleLoading}
-        className="mt-5 flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#d62828] text-lg font-medium text-white shadow-md hover:bg-[#bb1f1f] cursor-pointer"
+        className="mt-5 flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#d62828] text-lg font-medium text-white shadow-md hover:bg-[#bb1f1f]"
       >
-        <img
-          src="/images/google.png"
-          alt="Google"
-          className="h-5 w-5"
-        />
+        <img src="/images/google.png" alt="Google" className="h-5 w-5" />
         {googleLoading ? "Loading..." : "Log In with Google"}
       </button>
 
-      {/* ✅ Feature: Back to Sign Up */}
       <div className="mt-6 text-center">
-        <Link 
-          href="/register" 
-          className="text-sm font-bold text-red-600 underline hover:text-red-800 transition-colors cursor-pointer"
+        <Link
+          href="/register"
+          className="cursor-pointer text-sm font-bold text-red-600 underline transition-colors hover:text-red-800"
         >
           Back to Sign Up
         </Link>

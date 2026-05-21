@@ -111,6 +111,138 @@ export type Database = {
           status?: string | null;
         };
       };
+
+      organizer_tourna: {
+        Row: {
+          id: string;
+          created_at: string;
+          organizer: string | null;
+          tourna_name: string | null;
+          email: string | null;
+          organizer_id: string | null;
+          tournament_id: number | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          organizer?: string | null;
+          tourna_name?: string | null;
+          email?: string | null;
+          organizer_id?: string | null;
+          tournament_id?: number | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          organizer?: string | null;
+          tourna_name?: string | null;
+          email?: string | null;
+          organizer_id?: string | null;
+          tournament_id?: number | null;
+        };
+      };
+
+      player_tourna: {
+        Row: {
+          id: string;
+          created_at: string;
+          username: string | null;
+          email: string | null;
+          tourna_name: string | null;
+          player_id: string | null;
+          tournament_id: number | null;
+          selected_category: string | null;
+          status: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          username?: string | null;
+          email?: string | null;
+          tourna_name?: string | null;
+          player_id?: string | null;
+          tournament_id?: number | null;
+          selected_category?: string | null;
+          status?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          username?: string | null;
+          email?: string | null;
+          tourna_name?: string | null;
+          player_id?: string | null;
+          tournament_id?: number | null;
+          selected_category?: string | null;
+          status?: string | null;
+        };
+      };
+
+      tournaments: {
+        Row: {
+          id: number;
+          organizer_id: string;
+          tournament_name: string;
+          sport: string | null;
+          tournament_type: string | null;
+          category: string | null;
+          description: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          venue: string | null;
+          location: string | null;
+          reg_start_date: string | null;
+          reg_end_date: string | null;
+          max_participants: number | null;
+          entry_fee: number | null;
+          rules_guidelines: string | null;
+          status: string | null;
+          allow_kata: boolean;
+          allow_kumite: boolean;
+        };
+        Insert: {
+          id?: number;
+          organizer_id: string;
+          tournament_name: string;
+          sport?: string | null;
+          tournament_type?: string | null;
+          category?: string | null;
+          description?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          venue?: string | null;
+          location?: string | null;
+          reg_start_date?: string | null;
+          reg_end_date?: string | null;
+          max_participants?: number | null;
+          entry_fee?: number | null;
+          rules_guidelines?: string | null;
+          status?: string | null;
+          allow_kata?: boolean;
+          allow_kumite?: boolean;
+        };
+        Update: {
+          id?: number;
+          organizer_id?: string;
+          tournament_name?: string;
+          sport?: string | null;
+          tournament_type?: string | null;
+          category?: string | null;
+          description?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          venue?: string | null;
+          location?: string | null;
+          reg_start_date?: string | null;
+          reg_end_date?: string | null;
+          max_participants?: number | null;
+          entry_fee?: number | null;
+          rules_guidelines?: string | null;
+          status?: string | null;
+          allow_kata?: boolean;
+          allow_kumite?: boolean;
+        };
+      };
     };
   };
 };

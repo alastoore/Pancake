@@ -18,6 +18,18 @@ type OrganizerVerification = {
   status: VerificationStatus;
 };
 
+type OrganizerProfileRow = {
+  id: string;
+  username: string | null;
+  organization_name: string | null;
+  location: string | null;
+  position: string | null;
+  dob: string | null;
+  organization_certificate: string | null;
+  created_at?: string | null;
+  status: VerificationStatus;
+};
+
 export default function AdminVerifyPage() {
   const supabase = getSupabaseBrowserClient();
 
@@ -27,7 +39,7 @@ export default function AdminVerifyPage() {
   // 🔥 FETCH REAL PLAYERS
   useEffect(() => {
     const fetchOrganizers = async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("organizer_profiles")
         .select("*")
         .eq("status", "pending");
@@ -37,15 +49,15 @@ export default function AdminVerifyPage() {
         return;
       }
 
-      const formatted = data.map((p: any) => ({
+      const formatted = (data as OrganizerProfileRow[]).map((p) => ({
         id: p.id,
-        username: p.username,
-        orgName: p.organization_name,
-        location: p.location,
-        position: p.position,
-        dob: p.dob,
-        certificate_url: p.organization_certificate,
-        submittedAt: p.created_at,
+        username: p.username || "Unnamed Organizer",
+        orgName: p.organization_name || "Unnamed Organization",
+        location: p.location || "Not set",
+        position: p.position || "Not set",
+        dob: p.dob || "Not set",
+        certificate_url: p.organization_certificate || undefined,
+        submittedAt: p.created_at || undefined,
         status: p.status,
       }));
 
@@ -54,7 +66,7 @@ export default function AdminVerifyPage() {
     };
 
     fetchOrganizers();
-  }, []);
+  }, [supabase]);
 
   const pendingCount = useMemo(
     () => organizers.filter((organizer) => organizer.status === "pending").length,
