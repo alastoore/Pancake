@@ -90,8 +90,7 @@ export default function EditProfilePage() {
 
     alert("Profile updated successfully!");
 
-    // 🔥 Redirect back to profile (will refetch updated data)
-    router.push("/organizer/profile");
+    router.push("/player/profile");
   };
 
   return (
@@ -156,18 +155,6 @@ export default function EditProfilePage() {
               value={dob}
               onChange={(e) => setDob(e.target.value)}
               className={`${inputStyle} ${!dob ? "text-gray-400" : "text-gray-900"}`}
-            />
-          </div>
-
-          {/* Location (Kept as text input as per original code) */}
-          <div className="relative">
-            <label className={labelStyle}>Location</label>
-            <input
-              type="text"
-              placeholder="e.g. Cebu City"
-              value={location}
-              onChange={(e) => setLoc(e.target.value)}
-              className={inputStyle}
             />
           </div>
 
