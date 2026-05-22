@@ -12,18 +12,13 @@ const playerStats = [
   { label: "Team Ranking", value: "#12", icon: "/images/ranking-icon.png" },
 ];
 
-const upcomingMatches = [
-  {
-    event: "City Sports Open - Round 1",
-    date: "Oct 15, 2026",
-    sport: "Taekwondo",
-  },
-  {
-    event: "Weekly Local Scrimmage",
-    date: "Oct 18, 2026",
-    sport: "Taekwondo",
-  },
-];
+interface UpcomingMatch {
+  event: string;
+  date: string;
+  sport: string;
+}
+
+const upcomingMatches: UpcomingMatch[] = [];
 
 type Profile = {
   id: string;
