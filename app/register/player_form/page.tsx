@@ -281,8 +281,10 @@ export default function RegisterPage() {
                 <option value="" disabled>Belt Rank</option>
                 <option>White</option>
                 <option>Yellow</option>
+                <option>Orange</option>
                 <option>Green</option>
                 <option>Blue</option>
+                <option>Purple</option>
                 <option>Brown</option>
                 <option>Black</option>
               </select>
