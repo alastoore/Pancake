@@ -83,7 +83,7 @@ export default function EmailPasswordDemo() {
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
-    });
+    });  
 
     if (error) {
       setStatus(error.message);
@@ -130,16 +130,6 @@ export default function EmailPasswordDemo() {
             required
             className="h-12 w-full rounded-xl bg-[#f2f2f2] px-4 text-gray-900 outline-none placeholder:text-gray-400 focus:border focus:border-red-500"
           />
-          <div className="mt-2 text-right">
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              disabled={forgotPasswordLoading}
-              className="text-sm font-semibold text-red-600 underline transition-colors hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {forgotPasswordLoading ? "Sending reset link..." : "Forgot your password?"}
-            </button>
-          </div>
         </div>
 
         {status && (
@@ -161,14 +151,6 @@ export default function EmailPasswordDemo() {
         </button>
       </form>
 
-      <button
-        onClick={handleGoogleLogin}
-        disabled={googleLoading}
-        className="mt-5 flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-[#d62828] text-lg font-medium text-white shadow-md hover:bg-[#bb1f1f]"
-      >
-        <img src="/images/google.png" alt="Google" className="h-5 w-5" />
-        {googleLoading ? "Loading..." : "Log In with Google"}
-      </button>
 
       <div className="mt-6 text-center">
         <Link
